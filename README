@@ -1,0 +1,3 @@
+This is a fork of goauth2 but with extra bits in to work with ORCID.org's OAuth2 authentication. This is a stop-gap until the goauth2 library has the right functionality to allow us to do this without the modification. 
+
+It is based on https://code.google.com/p/goauth2/ as of August 29th 2013. 
