@@ -326,6 +326,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		Refresh   string        `json:"refresh_token"`
 		ExpiresIn time.Duration `json:"expires_in"`
 		Id        string        `json:"id_token"`
+		Orcid     string        `json:"orcid"`
 	}
 
 	content, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
@@ -344,6 +345,7 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 		b.Refresh = vals.Get("refresh_token")
 		b.ExpiresIn, _ = time.ParseDuration(vals.Get("expires_in") + "s")
 		b.Id = vals.Get("id_token")
+		b.Orcid = vals.Get("orcid")
 	default:
 		if err = json.NewDecoder(r.Body).Decode(&b); err != nil {
 			return err
@@ -367,6 +369,12 @@ func (t *Transport) updateToken(tok *Token, v url.Values) error {
 			tok.Extra = make(map[string]string)
 		}
 		tok.Extra["id_token"] = b.Id
+	}
+	if b.Orcid != "" {
+		if tok.Extra == nil {
+			tok.Extra = make(map[string]string)
+		}
+		tok.Extra["orcid"] = b.Orcid
 	}
 	return nil
 }

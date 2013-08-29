@@ -30,7 +30,8 @@ var requests = []struct {
 				"access_token":"token1",
 				"refresh_token":"refreshtoken1",
 				"id_token":"idtoken1",
-				"expires_in":3600
+				"expires_in":3600,
+				"orcid": "0000-ORCID-0000-0000"
 			}
 		`,
 	},
@@ -44,7 +45,8 @@ var requests = []struct {
 				"access_token":"token2",
 				"refresh_token":"refreshtoken2",
 				"id_token":"idtoken2",
-				"expires_in":3600
+				"expires_in":3600,
+				"orcid": "0000-ORCID-0000-0000"
 			}
 		`,
 	},
@@ -105,7 +107,7 @@ func TestOAuth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Exchange: %v", err)
 	}
-	checkToken(t, transport.Token, "token1", "refreshtoken1", "idtoken1")
+	checkToken(t, transport.Token, "token1", "refreshtoken1", "idtoken1", "0000-ORCID-0000-0000")
 
 	c := transport.Client()
 	resp, err := c.Get(server.URL + "/secure")
@@ -121,7 +123,7 @@ func TestOAuth(t *testing.T) {
 		t.Fatalf("Get: %v", err)
 	}
 	checkBody(t, resp, "second payload")
-	checkToken(t, transport.Token, "token2", "refreshtoken2", "idtoken2")
+	checkToken(t, transport.Token, "token2", "refreshtoken2", "idtoken2", "0000-ORCID-0000-0000")
 
 	// refresh one more time, but get URL-encoded token instead of JSON
 	transport.Expiry = time.Now()
@@ -130,10 +132,10 @@ func TestOAuth(t *testing.T) {
 		t.Fatalf("Get: %v", err)
 	}
 	checkBody(t, resp, "third payload")
-	checkToken(t, transport.Token, "token3", "refreshtoken3", "idtoken3")
+	checkToken(t, transport.Token, "token3", "refreshtoken3", "idtoken3", "0000-ORCID-0000-0000")
 }
 
-func checkToken(t *testing.T, tok *Token, access, refresh, id string) {
+func checkToken(t *testing.T, tok *Token, access, refresh, id, orcid string) {
 	if g, w := tok.AccessToken, access; g != w {
 		t.Errorf("AccessToken = %q, want %q", g, w)
 	}
@@ -143,6 +145,10 @@ func checkToken(t *testing.T, tok *Token, access, refresh, id string) {
 	if g, w := tok.Extra["id_token"], id; g != w {
 		t.Errorf("Extra['id_token'] = %q, want %q", g, w)
 	}
+	if g, w := tok.Extra["orcid"], orcid; g != w {
+		t.Errorf("Extra['orcid'] = %q, want %q", g, w)
+	}
+
 	exp := tok.Expiry.Sub(time.Now())
 	if (time.Hour-time.Second) > exp || exp > time.Hour {
 		t.Errorf("Expiry = %v, want ~1 hour", exp)
